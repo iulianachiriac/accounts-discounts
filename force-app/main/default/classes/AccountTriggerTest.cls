@@ -1,8 +1,8 @@
 @isTest
 public class AccountTriggerTest {
   //more than 40,000 accounts have to be updated regularly
-  private static final Integer NUM_OF_TOP_LEVEL_ACCOUNTS = 4;
-  private static final Integer NUM_OF_CHILDREN_ACCOUNTS = 10;
+  private static final Integer NUM_OF_TOP_LEVEL_ACCOUNTS = 2;
+  private static final Integer NUM_OF_CHILDREN_ACCOUNTS = 4;
   private static final Decimal PARENT_DISCOUNT = 50;
 
   @TestSetup
@@ -131,7 +131,7 @@ public class AccountTriggerTest {
     Test.startTest();
     update childrenAccounts;
     Test.stopTest();
-    //count of children accounts related to first parent
+    // count of children accounts related to first parent
     Assert.areEqual(
       0,
       [
@@ -240,12 +240,17 @@ public class AccountTriggerTest {
 
     insert secondLevelAccounts;
     childrenAccounts.addAll(secondLevelAccounts);
+    Assert.areEqual(
+      topLevelAccounts.size() * NUM_OF_CHILDREN_ACCOUNTS,
+      secondLevelAccounts.size(),
+      'Failed to get expected size of second level accounts list)'
+    );
 
     List<Account> thirdLevelAccounts = new List<Account>();
 
     // Create third-level accounts
     for (Account secondLevelAccount : secondLevelAccounts) {
-      for (Integer i = 0; i < secondLevelAccounts.size(); i++) {
+      for (Integer i = 0; i < NUM_OF_CHILDREN_ACCOUNTS; i++) {
         Account thirdLevelAccount = new Account(
           Name = 'Test Third Level Account ' + i,
           ParentId = secondLevelAccount.Id,
@@ -257,12 +262,17 @@ public class AccountTriggerTest {
 
     insert thirdLevelAccounts;
     childrenAccounts.addAll(thirdLevelAccounts);
+    Assert.areEqual(
+      secondLevelAccounts.size() * NUM_OF_CHILDREN_ACCOUNTS,
+      thirdLevelAccounts.size(),
+      'Failed to get expected size of third level accounts list)'
+    );
 
     List<Account> fourthLevelAccounts = new List<Account>();
 
     // Create fourth-level accounts
     for (Account thirdLevelAccount : thirdLevelAccounts) {
-      for (Integer i = 0; i < thirdLevelAccounts.size(); i++) {
+      for (Integer i = 0; i < NUM_OF_CHILDREN_ACCOUNTS; i++) {
         Account fourthLevelAccount = new Account(
           Name = 'Test Fourth Level Account ' + i,
           ParentId = thirdLevelAccount.Id,
@@ -274,16 +284,19 @@ public class AccountTriggerTest {
 
     insert fourthLevelAccounts;
     childrenAccounts.addAll(fourthLevelAccounts);
+    Assert.areEqual(
+      thirdLevelAccounts.size() * NUM_OF_CHILDREN_ACCOUNTS,
+      fourthLevelAccounts.size(),
+      'Failed to get expected size of fourth level accounts list)'
+    );
 
     Assert.areEqual(
-      NUM_OF_TOP_LEVEL_ACCOUNTS *
-      (1 +
-      NUM_OF_CHILDREN_ACCOUNTS +
-      Math.pow(NUM_OF_CHILDREN_ACCOUNTS, 2) +
-      Math.pow(NUM_OF_CHILDREN_ACCOUNTS, 3) +
-      Math.pow(NUM_OF_CHILDREN_ACCOUNTS, 4)),
+      NUM_OF_CHILDREN_ACCOUNTS *
+      (topLevelAccounts.size() +
+      secondLevelAccounts.size() +
+      thirdLevelAccounts.size()),
       childrenAccounts.size(),
-      'Failed to get expected size of list'
+      'Failed to get expected size of children accounts list'
     );
 
     return childrenAccounts;
