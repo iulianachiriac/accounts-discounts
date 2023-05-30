@@ -1,8 +1,8 @@
 @isTest
 public class AccountTriggerTest {
   //more than 40,000 accounts have to be updated regularly
-  private static final Integer NUM_OF_TOP_LEVEL_ACCOUNTS = 2;
-  private static final Integer NUM_OF_CHILDREN_ACCOUNTS = 4;
+  private static final Integer NUM_OF_TOP_LEVEL_ACCOUNTS = 4;
+  private static final Integer NUM_OF_CHILDREN_ACCOUNTS = 10;
   private static final Decimal PARENT_DISCOUNT = 50;
 
   @TestSetup
@@ -214,7 +214,7 @@ public class AccountTriggerTest {
 
   /**
    * This method creates 4 levels of accounts
-   * (each one with their children accounts, except the last one)
+   * (each one with their children accounts)
    * @param topLevelAccounts
    * @param hasLockedDiscount
    * @return  `List<Account>`
@@ -290,15 +290,37 @@ public class AccountTriggerTest {
       'Failed to get expected size of fourth level accounts list)'
     );
 
+    List<Account> fifthLevelAccounts = new List<Account>();
+
+    // Create fifth-level accounts
+    for (Account fourthLevelAccount : fourthLevelAccounts) {
+      for (Integer i = 0; i < NUM_OF_CHILDREN_ACCOUNTS; i++) {
+        Account fifthLevelAccount = new Account(
+          Name = 'Test Fifth Level Account ' + i,
+          ParentId = fourthLevelAccount.Id,
+          HasLockedDiscount__c = false
+        );
+        fifthLevelAccounts.add(fifthLevelAccount);
+      }
+    }
+
+    insert fifthLevelAccounts;
+    childrenAccounts.addAll(fifthLevelAccounts);
+    Assert.areEqual(
+      fourthLevelAccounts.size() * NUM_OF_CHILDREN_ACCOUNTS,
+      fifthLevelAccounts.size(),
+      'Failed to get expected size of fifth level accounts list)'
+    );
+
     Assert.areEqual(
       NUM_OF_CHILDREN_ACCOUNTS *
       (topLevelAccounts.size() +
       secondLevelAccounts.size() +
-      thirdLevelAccounts.size()),
+      thirdLevelAccounts.size() +
+      fourthLevelAccounts.size()),
       childrenAccounts.size(),
       'Failed to get expected size of children accounts list'
     );
-
     return childrenAccounts;
   }
 }
