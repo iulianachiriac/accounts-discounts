@@ -1,3 +1,10 @@
+/**
+ * @description       :
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             :
+ * @last modified on  : 06-06-2023
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+ **/
 @isTest
 public class AccountTriggerTest {
   //more than 40,000 accounts have to be updated regularly
@@ -17,9 +24,7 @@ public class AccountTriggerTest {
       );
       topLevelAccounts.add(topLevelAccount);
     }
-    Test.startTest();
     insert topLevelAccounts;
-    Test.stopTest();
   }
 
   @isTest
@@ -30,7 +35,7 @@ public class AccountTriggerTest {
       LIMIT :NUM_OF_TOP_LEVEL_ACCOUNTS
     ];
 
-    List<Account> childrenAccounts = itShouldCreateChildrenAccounts(
+    List<Account> childrenAccounts = createChildrenAccounts(
       topLevelAccounts,
       false
     );
@@ -65,7 +70,7 @@ public class AccountTriggerTest {
       LIMIT :NUM_OF_TOP_LEVEL_ACCOUNTS
     ];
 
-    List<Account> childrenAccounts = itShouldCreateChildrenAccounts(
+    List<Account> childrenAccounts = createChildrenAccounts(
       topLevelAccounts,
       true
     );
@@ -105,10 +110,7 @@ public class AccountTriggerTest {
     ];
     Id firstParentId = firstParent[0].Id;
 
-    List<Account> childrenAccounts = itShouldCreateChildrenAccounts(
-      firstParent,
-      false
-    );
+    List<Account> childrenAccounts = createChildrenAccounts(firstParent, false);
     Account secondParent = [
       SELECT Id, Discount__c
       FROM Account
@@ -165,7 +167,7 @@ public class AccountTriggerTest {
       LIMIT :NUM_OF_TOP_LEVEL_ACCOUNTS
     ];
 
-    List<Account> childrenAccounts = itShouldCreateChildrenAccounts(
+    List<Account> childrenAccounts = createChildrenAccounts(
       topLevelAccounts,
       false
     );
@@ -212,6 +214,32 @@ public class AccountTriggerTest {
     }
   }
 
+  @isTest
+  private static void itShouldCreateChildrenAccounts() {
+    List<Account> topLevelAccounts = [
+      SELECT Id, Discount__c
+      FROM Account
+      LIMIT :NUM_OF_TOP_LEVEL_ACCOUNTS
+    ];
+
+    List<Account> childrenAccounts = createChildrenAccounts(
+      topLevelAccounts,
+      false
+    );
+
+    Double expectedNumberOfChildrenAccounts =
+      NUM_OF_TOP_LEVEL_ACCOUNTS *
+      (NUM_OF_CHILDREN_ACCOUNTS +
+      Math.pow(NUM_OF_CHILDREN_ACCOUNTS, 2) +
+      Math.pow(NUM_OF_CHILDREN_ACCOUNTS, 3) +
+      Math.pow(NUM_OF_CHILDREN_ACCOUNTS, 4));
+
+    Assert.areEqual(
+      expectedNumberOfChildrenAccounts,
+      childrenAccounts.size(),
+      'Failed to get expected size of children accounts list'
+    );
+  }
   /**
    * This method creates 4 levels of accounts
    * (each one with their children accounts)
@@ -219,7 +247,7 @@ public class AccountTriggerTest {
    * @param hasLockedDiscount
    * @return  `List<Account>`
    */
-  private static List<Account> itShouldCreateChildrenAccounts(
+  private static List<Account> createChildrenAccounts(
     List<Account> topLevelAccounts,
     Boolean hasLockedDiscount
   ) {
@@ -240,12 +268,6 @@ public class AccountTriggerTest {
 
     insert secondLevelAccounts;
     childrenAccounts.addAll(secondLevelAccounts);
-    Assert.areEqual(
-      topLevelAccounts.size() * NUM_OF_CHILDREN_ACCOUNTS,
-      secondLevelAccounts.size(),
-      'Failed to get expected size of second level accounts list)'
-    );
-
     List<Account> thirdLevelAccounts = new List<Account>();
 
     // Create third-level accounts
@@ -262,11 +284,6 @@ public class AccountTriggerTest {
 
     insert thirdLevelAccounts;
     childrenAccounts.addAll(thirdLevelAccounts);
-    Assert.areEqual(
-      secondLevelAccounts.size() * NUM_OF_CHILDREN_ACCOUNTS,
-      thirdLevelAccounts.size(),
-      'Failed to get expected size of third level accounts list)'
-    );
 
     List<Account> fourthLevelAccounts = new List<Account>();
 
@@ -284,11 +301,6 @@ public class AccountTriggerTest {
 
     insert fourthLevelAccounts;
     childrenAccounts.addAll(fourthLevelAccounts);
-    Assert.areEqual(
-      thirdLevelAccounts.size() * NUM_OF_CHILDREN_ACCOUNTS,
-      fourthLevelAccounts.size(),
-      'Failed to get expected size of fourth level accounts list)'
-    );
 
     List<Account> fifthLevelAccounts = new List<Account>();
 
@@ -306,21 +318,6 @@ public class AccountTriggerTest {
 
     insert fifthLevelAccounts;
     childrenAccounts.addAll(fifthLevelAccounts);
-    Assert.areEqual(
-      fourthLevelAccounts.size() * NUM_OF_CHILDREN_ACCOUNTS,
-      fifthLevelAccounts.size(),
-      'Failed to get expected size of fifth level accounts list)'
-    );
-
-    Assert.areEqual(
-      NUM_OF_CHILDREN_ACCOUNTS *
-      (topLevelAccounts.size() +
-      secondLevelAccounts.size() +
-      thirdLevelAccounts.size() +
-      fourthLevelAccounts.size()),
-      childrenAccounts.size(),
-      'Failed to get expected size of children accounts list'
-    );
     return childrenAccounts;
   }
 }

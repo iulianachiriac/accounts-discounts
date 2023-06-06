@@ -1,7 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>HasLockedDiscount__c</fullName>
     <defaultValue>false</defaultValue>
+    <description
+  >Each account should always reflect the discount (Discount__c) of its parent account unless it has this field enabled.</description>
     <externalId>false</externalId>
     <label>HasLockedDiscount</label>
     <trackFeedHistory>false</trackFeedHistory>
